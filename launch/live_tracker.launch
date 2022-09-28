@@ -1,0 +1,3 @@
+<launch>
+<node pkg="live_tracker" type="live_tracker.py" name="live_tracker" output="screen" />
+</launch>
