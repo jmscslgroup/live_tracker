@@ -100,15 +100,15 @@ def getGPSResultStr():
 	global longitude
 	global altitude
 	global status
-        return ','.join([gpstime, systime, latitude, longitude, altitude, status])
+        return ','.join([str(gpstime.to_sec()), str(systime.to_sec()), str(latitude), str(longitude), str(altitude), str(status)])
 
-def getCANResultStr(can_file):
+def getCANResultStr():
 	global velocity
 	global acceleration
 	global relative_leadervel
 	global relative_distance
 	global acc_status
-        return ','.join([velocity, acceleration, relative_leadervel, relative_distance, acc_status])
+        return ','.join([str(velocity), str(acceleration), str(relative_leadervel), str(relative_distance), str(acc_status)])
 
 class LiveTracker:
 	def __init__(self):
@@ -142,7 +142,7 @@ class LiveTracker:
 				gps = getGPSResultStr()
 				can = getCANResultStr()
 				data_str = "?circles," + vin + "," + gps + "," + can
-				get_str = WEB_PATH + data_str
+				get_str = web_path + data_str
 				print(get_str)
 				print(requests.get(get_str))
 			except Exception as e:
