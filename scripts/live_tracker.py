@@ -14,7 +14,7 @@ velocity_topic = "vel"
 acceleration_topic = "accel"
 relative_leadervel_topic = "rel_vel"
 relative_distance_topic = "lead_dist"
-acc_status_topic = None
+acc_status_topic = "acc/cruise_state_int"
 
 velocity = 0.0
 acceleration = 0.0
@@ -72,7 +72,10 @@ def relative_distance_callback(data):
         can_update_time = rospy.Time.now()
 
 def acc_status_callback(data):
-        pass
+	global acc_status
+	global can_update_time
+        acc_status = data.data
+	can_update_time = rospy.Time.now()
 
 def gps_fix_callback(data):
 	global systime
@@ -118,6 +121,7 @@ class LiveTracker:
 		rospy.Subscriber(acceleration_topic, Float64, acceleration_callback)
 		rospy.Subscriber(relative_leadervel_topic, Float64, relative_leadervel_callback)
 		rospy.Subscriber(relative_distance_topic, Float64, relative_distance_callback)
+		rospy.Subscriber(acc_status_topic, Float64, acc_status_callback)
 		rospy.Subscriber(gps_fix_topic, NavSatFix, gps_fix_callback)
 		rospy.Subscriber(gps_fix_time_reference_topic, TimeReference, gps_fix_time_reference_callback)
 		self.rate = rospy.Rate(1)
