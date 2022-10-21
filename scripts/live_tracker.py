@@ -2,7 +2,7 @@
 
 
 import rospy
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, Int16
 from sensor_msgs.msg import NavSatFix, TimeReference
 import traceback
 import os
@@ -121,7 +121,7 @@ class LiveTracker:
 		rospy.Subscriber(acceleration_topic, Float64, acceleration_callback)
 		rospy.Subscriber(relative_leadervel_topic, Float64, relative_leadervel_callback)
 		rospy.Subscriber(relative_distance_topic, Float64, relative_distance_callback)
-		rospy.Subscriber(acc_status_topic, Float64, acc_status_callback)
+		rospy.Subscriber(acc_status_topic, Int16, acc_status_callback)
 		rospy.Subscriber(gps_fix_topic, NavSatFix, gps_fix_callback)
 		rospy.Subscriber(gps_fix_time_reference_topic, TimeReference, gps_fix_time_reference_callback)
 		self.rate = rospy.Rate(1)
