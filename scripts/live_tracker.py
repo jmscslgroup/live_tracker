@@ -10,16 +10,26 @@ import sys
 import requests
 import time
 
+position_topic = "xpos"
 velocity_topic = "vel"
-acceleration_topic = "accel"
 relative_leadervel_topic = "rel_vel"
 relative_distance_topic = "lead_dist"
+left_relvel_topic = "left_relvel"
+left_yaw_topic = "left_yaw"
+right_relvel_topic = "right_relvel"
+right_yaw_topic = "right_yaw"
+acc_speed_topic = "acc/set_speed"
 acc_status_topic = "acc/cruise_state_int"
 
+position = 0.0
 velocity = 0.0
-acceleration = 0.0
 relative_leadervel = 0.0
 relative_distance = 0.0
+left_relvel = 0.0
+left_yaw = 90.0
+right_relvel = 0.0
+right_yaw = 90.0
+acc_speed = 20
 acc_status = 0
 can_update_time = None
 
@@ -29,13 +39,12 @@ gpstime = None
 systime = None
 latitude = None
 longitude = None
-altitude = None
 status = None
 gps_update_time = None
 
 vin=None
 vin_path="/etc/libpanda.d/vin"
-web_path="http://ransom.isis.vanderbilt.edu/LIVE_VIEWER_SITE/rest.php"
+web_path="http://ransom.isis.vanderbilt.edu/FACT_VEHICLE_PING/rest.php"
 
 def readAllFile(path):
     assert os.path.exists(path), path + " file does not exist apparently!"
@@ -47,16 +56,16 @@ def readAllFile(path):
 def getVIN():
     return readAllFile(vin_path)
 
+def position_callback(data):
+    global position
+    global can_update_time
+    position = data.data
+    can_update_time = rospy.Time.now()
+
 def velocity_callback(data):
     global velocity
     global can_update_time
     velocity = data.data
-    can_update_time = rospy.Time.now()
-
-def acceleration_callback(data):
-    global acceleration
-    global can_update_time
-    acceleration = data.data
     can_update_time = rospy.Time.now()
 
 def relative_leadervel_callback(data):
@@ -71,6 +80,36 @@ def relative_distance_callback(data):
     relative_distance = data.data
     can_update_time = rospy.Time.now()
 
+def left_relvel_callback(data):
+    global left_relvel
+    global can_update_time
+    left_relvel = data.data
+    can_update_time = rospy.Time.now()
+
+def left_yaw_callback(data):
+    global left_yaw
+    global can_update_time
+    left_yaw = data.data
+    can_update_time = rospy.Time.now()
+
+def right_relvel_callback(data):
+    global right_relvel
+    global can_update_time
+    right_relvel = data.data
+    can_update_time = rospy.Time.now()
+
+def right_yaw_callback(data):
+    global right_yaw
+    global can_update_time
+    right_yaw = data.data
+    can_update_time = rospy.Time.now()
+    
+def acc_speed_callback(data):
+    global acc_speed
+    global can_update_time
+    acc_speed = data.data
+    can_update_time = rospy.Time.now()
+
 def acc_status_callback(data):
     global acc_status
     global can_update_time
@@ -81,13 +120,11 @@ def gps_fix_callback(data):
     global systime
     global latitude
     global longitude
-    global altitude
     global status
     global gps_update_time
 
     latitude = data.latitude
     longitude = data.longitude
-    altitude = data.altitude
     status = data.status.status
     systime = rospy.Time.now()
     gps_update_time = systime
@@ -101,26 +138,43 @@ def getGPSResultStr():
     global systime
     global latitude
     global longitude
-    global altitude
     global status
-    return ','.join([str(gpstime.to_sec()), str(systime.to_sec()), str(latitude), str(longitude), str(altitude), str(status)])
+    global position
+    return ','.join([str(gpstime.to_sec()),
+                     str(systime.to_sec()),
+                     str(latitude),
+                     str(longitude),
+                     str(status),
+                     str(position)])
 
 def getCANResultStr():
     global velocity
-    global acceleration
     global relative_leadervel
     global relative_distance
     global acc_status
-    return ','.join([str(velocity), str(acceleration), str(relative_leadervel), str(relative_distance), str(acc_status)])
+    return ','.join([str(velocity / 3.6),
+                     str(relative_leadervel),
+                     str(relative_distance),
+                     str(left_relvel),
+                     str(left_yaw),
+                     str(right_relvel),
+                     str(right_yaw),
+                     str(acc_speed),
+                     str(acc_status)])
 
 class LiveTracker:
     def __init__(self):
         global vin
         rospy.init_node('LiveTracker', anonymous=True)
+        rospy.Subscriber(position_topic, Float64, position_callback)
         rospy.Subscriber(velocity_topic, Float64, velocity_callback)
-        rospy.Subscriber(acceleration_topic, Float64, acceleration_callback)
         rospy.Subscriber(relative_leadervel_topic, Float64, relative_leadervel_callback)
         rospy.Subscriber(relative_distance_topic, Float64, relative_distance_callback)
+        rospy.Subscriber(left_relvel_topic, Float64, left_relvel_callback)
+        rospy.Subscriber(left_yaw_topic, Float64, left_yaw_callback)
+        rospy.Subscriber(right_relvel_topic, Float64, right_relvel_callback)
+        rospy.Subscriber(right_yaw_topic, Float64, right_yaw_callback)
+        rospy.Subscriber(acc_speed_topic, Int16, acc_speed_callback)
         rospy.Subscriber(acc_status_topic, Int16, acc_status_callback)
         rospy.Subscriber(gps_fix_topic, NavSatFix, gps_fix_callback)
         rospy.Subscriber(gps_fix_time_reference_topic, TimeReference, gps_fix_time_reference_callback)
