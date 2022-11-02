@@ -12,6 +12,7 @@ import time
 
 position_topic = "xpos"
 velocity_topic = "vel"
+acceleration_topic = "accel"
 relative_leadervel_topic = "rel_vel"
 relative_distance_topic = "lead_dist"
 left_relvel_topic = "left_relvel"
@@ -23,6 +24,7 @@ acc_status_topic = "acc/cruise_state_int"
 
 position = 0.0
 velocity = 0.0
+acceleration = 0.0
 relative_leadervel = 0.0
 relative_distance = 0.0
 left_relvel = 0.0
@@ -66,6 +68,12 @@ def velocity_callback(data):
     global velocity
     global can_update_time
     velocity = data.data
+    can_update_time = rospy.Time.now()
+   
+def acceleration_callback(data):
+    global acceleration
+    global can_update_time
+    acceleration = data.data
     can_update_time = rospy.Time.now()
 
 def relative_leadervel_callback(data):
@@ -149,10 +157,12 @@ def getGPSResultStr():
 
 def getCANResultStr():
     global velocity
+    global acceleration
     global relative_leadervel
     global relative_distance
     global acc_status
     return ','.join([str(velocity / 3.6),
+                     str(acceleration),
                      str(relative_leadervel),
                      str(relative_distance),
                      str(left_relvel),
@@ -168,6 +178,7 @@ class LiveTracker:
         rospy.init_node('LiveTracker', anonymous=True)
         rospy.Subscriber(position_topic, Float64, position_callback)
         rospy.Subscriber(velocity_topic, Float64, velocity_callback)
+        rospy.Subscriber(acceleration_topic, Float64, acceleration_callback)
         rospy.Subscriber(relative_leadervel_topic, Float64, relative_leadervel_callback)
         rospy.Subscriber(relative_distance_topic, Float64, relative_distance_callback)
         rospy.Subscriber(left_relvel_topic, Float64, left_relvel_callback)
