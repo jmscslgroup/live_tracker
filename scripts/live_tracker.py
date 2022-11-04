@@ -2,7 +2,7 @@
 
 
 import rospy
-from std_msgs.msg import Float64, Int16
+from std_msgs.msg import Float64, Int16, Bool
 from sensor_msgs.msg import NavSatFix, TimeReference
 import traceback
 import os
@@ -23,6 +23,7 @@ acc_speed_topic = "acc/set_speed"
 acc_status_topic = "acc/cruise_state_int"
 
 position = 0.0
+last_positions = [0.0] * 10
 velocity = 0.0
 acceleration = 0.0
 relative_leadervel = 0.0
@@ -88,29 +89,29 @@ def relative_distance_callback(data):
     relative_distance = data.data
     can_update_time = rospy.Time.now()
 
-def left_relvel_callback(data):
-    global left_relvel
-    global can_update_time
-    left_relvel = data.data
-    can_update_time = rospy.Time.now()
+# def left_relvel_callback(data):
+#     global left_relvel
+#     global can_update_time
+#     left_relvel = data.data
+#     can_update_time = rospy.Time.now()
 
-def left_yaw_callback(data):
-    global left_yaw
-    global can_update_time
-    left_yaw = data.data
-    can_update_time = rospy.Time.now()
+# def left_yaw_callback(data):
+#     global left_yaw
+#     global can_update_time
+#     left_yaw = data.data
+#     can_update_time = rospy.Time.now()
 
-def right_relvel_callback(data):
-    global right_relvel
-    global can_update_time
-    right_relvel = data.data
-    can_update_time = rospy.Time.now()
+# def right_relvel_callback(data):
+#     global right_relvel
+#     global can_update_time
+#     right_relvel = data.data
+#     can_update_time = rospy.Time.now()
 
-def right_yaw_callback(data):
-    global right_yaw
-    global can_update_time
-    right_yaw = data.data
-    can_update_time = rospy.Time.now()
+# def right_yaw_callback(data):
+#     global right_yaw
+#     global can_update_time
+#     right_yaw = data.data
+#     can_update_time = rospy.Time.now()
     
 def acc_speed_callback(data):
     global acc_speed
@@ -172,6 +173,11 @@ def getCANResultStr():
                      str(acc_speed),
                      str(acc_status)])
 
+def is_wb(positions):
+    """Check that positions increase monotonically."""
+    return all([x1 - x2 >= 0 for (x1, x2) in zip(positions[:-1], positions[1:])])
+
+
 class LiveTracker:
     def __init__(self):
         global vin
@@ -181,14 +187,16 @@ class LiveTracker:
         rospy.Subscriber(acceleration_topic, Float64, acceleration_callback)
         rospy.Subscriber(relative_leadervel_topic, Float64, relative_leadervel_callback)
         rospy.Subscriber(relative_distance_topic, Float64, relative_distance_callback)
-        rospy.Subscriber(left_relvel_topic, Float64, left_relvel_callback)
-        rospy.Subscriber(left_yaw_topic, Float64, left_yaw_callback)
-        rospy.Subscriber(right_relvel_topic, Float64, right_relvel_callback)
-        rospy.Subscriber(right_yaw_topic, Float64, right_yaw_callback)
+#         rospy.Subscriber(left_relvel_topic, Float64, left_relvel_callback)
+#         rospy.Subscriber(left_yaw_topic, Float64, left_yaw_callback)
+#         rospy.Subscriber(right_relvel_topic, Float64, right_relvel_callback)
+#         rospy.Subscriber(right_yaw_topic, Float64, right_yaw_callback)
         rospy.Subscriber(acc_speed_topic, Int16, acc_speed_callback)
         rospy.Subscriber(acc_status_topic, Int16, acc_status_callback)
         rospy.Subscriber(gps_fix_topic, NavSatFix, gps_fix_callback)
         rospy.Subscriber(gps_fix_time_reference_topic, TimeReference, gps_fix_time_reference_callback)
+
+        self.is_wb_pub = rospy.Publisher('/is_westbound', Bool, queue_size=10)
         self.rate = rospy.Rate(1)
         while vin is None:
             try:
@@ -197,7 +205,7 @@ class LiveTracker:
                 print(e)
                 traceback.print_exc()
                 print("Cannot get VIN at this time!")
-                time.sleep(1.0) #Wait 1 second hard-coded between checking for the VIN file
+                time.sleep(1.0)  # Wait 1 second hard-coded between checking for the VIN file
 
     def loop(self):
         while not rospy.is_shutdown():
@@ -208,12 +216,17 @@ class LiveTracker:
                 assert can_update_time is not None, "CAN data has never been received!"
                 assert abs((current_time - gps_update_time).to_sec()) < 30, "GPS data more than 30 seconds old!"
                 assert abs((current_time - can_update_time).to_sec()) < 30, "CAN data more than 30 seconds old!"
-                gps = getGPSResultStr()
+                last_positions.pop()
+                last_positions.insert(0, position)
+                wb = is_wb(last_positions)
+                self.is_wb_pub.publish(wb)
+                gps = getGPSResultStr(wb)
                 can = getCANResultStr()
-                data_str = "?circles," + vin + "," + gps + "," + can
+                data_str = "?circles," + vin + "," + gps + "," + can + "," + str(int(wb))
                 get_str = web_path + data_str
                 print(get_str)
                 print(requests.get(get_str))
+                
             except Exception as e:
                 print(e)
                 traceback.print_exc()
