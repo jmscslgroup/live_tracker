@@ -47,7 +47,7 @@ gps_update_time = None
 
 vin=None
 vin_path="/etc/libpanda.d/vin"
-web_path="http://ransom.isis.vanderbilt.edu/FACT_VEHICLE_PING/rest.php"
+web_path="http://ransom.isis.vanderbilt.edu/inrix/api/veh_ping.php"
 
 def readAllFile(path):
     assert os.path.exists(path), path + " file does not exist apparently!"
@@ -149,12 +149,12 @@ def getGPSResultStr():
     global longitude
     global status
     global position
-    return ','.join([str(gpstime.to_sec()),
-                     str(systime.to_sec()),
-                     str(latitude),
-                     str(longitude),
-                     str(status),
-                     str(position)])
+    return '&'.join(['gpstime={}'.format(gpstime.to_sec()),
+                     'systime={}'.format(systime.to_sec()),
+                     'latitude={}'.format(latitude),
+                     'longitude={}'.format(longitude),
+                     'status={}'.format(status),
+                     'position={}'.format(position)])
 
 def getCANResultStr():
     global velocity
@@ -162,16 +162,16 @@ def getCANResultStr():
     global relative_leadervel
     global relative_distance
     global acc_status
-    return ','.join([str(velocity),
-                     str(acceleration),
-                     str(relative_leadervel),
-                     str(relative_distance),
-                     str(left_relvel),
-                     str(left_yaw),
-                     str(right_relvel),
-                     str(right_yaw),
-                     str(acc_speed),
-                     str(acc_status)])
+    return '&'.join(['velocity={}'.format(velocity),
+                     'acceleration={}'.format(acceleration),
+                     'relative_leadervel={}'.format(relative_leadervel),
+                     'relative_distance={}'.format(relative_distance),
+                     'left_relvel={}'.format(left_relvel),
+                     'left_yaw={}'.format(left_yaw),
+                     'right_relvel={}'.format(right_relvel),
+                     'right_yaw={}'.format(right_yaw),
+                     'acc_speed_setting={}'.format(acc_speed),
+                     'acc_status={}'.format(acc_status)])
 
 def is_wb(positions):
     """Check that positions increase monotonically."""
@@ -222,7 +222,7 @@ class LiveTracker:
                 self.is_wb_pub.publish(wb)
                 gps = getGPSResultStr()
                 can = getCANResultStr()
-                data_str = "?circles," + vin + "," + gps + "," + can + "," + str(int(wb))
+                data_str = "?vin=" + vin + "&" + gps + "&" + can + "&is_wb={}".format(int(wb))
                 get_str = web_path + data_str
                 print(get_str)
                 print(requests.get(get_str))
