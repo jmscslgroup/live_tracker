@@ -220,7 +220,7 @@ class LiveTracker:
                 last_positions.insert(0, position)
                 wb = is_wb(last_positions)
                 self.is_wb_pub.publish(wb)
-                gps = getGPSResultStr(wb)
+                gps = getGPSResultStr()
                 can = getCANResultStr()
                 data_str = "?circles," + vin + "," + gps + "," + can + "," + str(int(wb))
                 get_str = web_path + data_str
