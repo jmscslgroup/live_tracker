@@ -162,7 +162,7 @@ def getCANResultStr():
     global relative_leadervel
     global relative_distance
     global acc_status
-    return ','.join([str(velocity / 3.6),
+    return ','.join([str(velocity),
                      str(acceleration),
                      str(relative_leadervel),
                      str(relative_distance),
