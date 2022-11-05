@@ -2,7 +2,7 @@
 
 
 import rospy
-from std_msgs.msg import Float64, Int16, Bool
+from std_msgs.msg import Bool, Float64, Int16, String
 from sensor_msgs.msg import NavSatFix, TimeReference
 import traceback
 import os
@@ -20,7 +20,7 @@ left_yaw_topic = "left_yaw"
 right_relvel_topic = "right_relvel"
 right_yaw_topic = "right_yaw"
 acc_speed_topic = "acc/set_speed"
-acc_status_topic = "acc/cruise_state_int"
+acc_status_topic = "acc/cruise_state"
 
 position = 0.0
 last_positions = [0.0] * 10
@@ -33,7 +33,7 @@ left_yaw = 90.0
 right_relvel = 0.0
 right_yaw = 90.0
 acc_speed = 20
-acc_status = 0
+acc_status = None
 can_update_time = None
 
 gps_fix_topic = "gps_fix"
@@ -162,6 +162,7 @@ def getCANResultStr():
     global relative_leadervel
     global relative_distance
     global acc_status
+    acc_status_int = {'enabled': 1}.get(acc_status, 0)
     return '&'.join(['velocity={}'.format(velocity),
                      'acceleration={}'.format(acceleration),
                      'relative_leadervel={}'.format(relative_leadervel),
@@ -171,7 +172,7 @@ def getCANResultStr():
                      'right_relvel={}'.format(right_relvel),
                      'right_yaw={}'.format(right_yaw),
                      'acc_speed_setting={}'.format(acc_speed),
-                     'acc_status={}'.format(acc_status)])
+                     'acc_status={}'.format(acc_status_int)])
 
 def is_wb(positions):
     """Check that positions increase monotonically."""
@@ -192,7 +193,7 @@ class LiveTracker:
 #         rospy.Subscriber(right_relvel_topic, Float64, right_relvel_callback)
 #         rospy.Subscriber(right_yaw_topic, Float64, right_yaw_callback)
         rospy.Subscriber(acc_speed_topic, Int16, acc_speed_callback)
-        rospy.Subscriber(acc_status_topic, Int16, acc_status_callback)
+        rospy.Subscriber(acc_status_topic, String, acc_status_callback)
         rospy.Subscriber(gps_fix_topic, NavSatFix, gps_fix_callback)
         rospy.Subscriber(gps_fix_time_reference_topic, TimeReference, gps_fix_time_reference_callback)
 
