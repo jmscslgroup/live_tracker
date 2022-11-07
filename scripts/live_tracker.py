@@ -134,7 +134,7 @@ def gps_fix_callback(data):
 
     latitude = data.latitude
     longitude = data.longitude
-    status = data.status.status
+    status = data.status
     systime = rospy.Time.now()
     gps_update_time = systime
 
