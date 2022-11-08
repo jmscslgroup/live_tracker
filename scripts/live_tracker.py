@@ -149,8 +149,8 @@ def getGPSResultStr():
     global longitude
     global status
     global position
-    return '&'.join(['gpstime={}'.format(gpstime.to_sec()),
-                     'systime={}'.format(systime.to_sec()),
+    return '&'.join(['gpstime={}'.format(int(gpstime.to_sec() * 1000)),
+                     'systime={}'.format(int(systime.to_sec() * 1000)),
                      'latitude={}'.format(latitude),
                      'longitude={}'.format(longitude),
                      'status={}'.format(status),
