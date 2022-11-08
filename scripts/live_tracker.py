@@ -162,7 +162,7 @@ def getCANResultStr():
     global relative_leadervel
     global relative_distance
     global acc_status
-    acc_status_int = {'enabled': 1}.get(acc_status, 0)
+    acc_status_int = {25: 1}.get(acc_status, 0)
     return '&'.join(['velocity={}'.format(velocity),
                      'acceleration={}'.format(acceleration),
                      'relative_leadervel={}'.format(relative_leadervel),
