@@ -20,7 +20,7 @@ left_yaw_topic = "left_yaw"
 right_relvel_topic = "right_relvel"
 right_yaw_topic = "right_yaw"
 acc_speed_topic = "acc/set_speed"
-acc_status_topic = "acc/cruise_state"
+acc_status_topic = "acc/cruise_state_int"
 
 position = 0.0
 last_positions = [0.0] * 10
