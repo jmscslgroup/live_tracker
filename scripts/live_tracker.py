@@ -193,7 +193,7 @@ class LiveTracker:
 #         rospy.Subscriber(right_relvel_topic, Float64, right_relvel_callback)
 #         rospy.Subscriber(right_yaw_topic, Float64, right_yaw_callback)
         rospy.Subscriber(acc_speed_topic, Int16, acc_speed_callback)
-        rospy.Subscriber(acc_status_topic, String, acc_status_callback)
+        rospy.Subscriber(acc_status_topic, Int16, acc_status_callback)
         rospy.Subscriber(gps_fix_topic, NavSatFix, gps_fix_callback)
         rospy.Subscriber(gps_fix_time_reference_topic, TimeReference, gps_fix_time_reference_callback)
 
