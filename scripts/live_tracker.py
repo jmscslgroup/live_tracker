@@ -23,7 +23,7 @@ acc_speed_topic = "acc/set_speed"
 acc_status_topic = "acc/cruise_state_int"
 
 position = 0.0
-last_positions = [0.0] * 10
+last_positions = [0.0] * 50
 velocity = 0.0
 acceleration = 0.0
 relative_leadervel = 0.0
@@ -175,8 +175,9 @@ def getCANResultStr():
                      'acc_status={}'.format(acc_status_int)])
 
 def is_wb(positions):
+    """vote. 100 obs, greater """
     """Check that positions increase monotonically."""
-    return all([x1 - x2 >= 0 for (x1, x2) in zip(positions[:-1], positions[1:])])
+    return sum([x1 - x2 >= -0.1 for (x1, x2) in zip(positions[:-1], positions[1:])]) >= 40
 
 
 class LiveTracker:
