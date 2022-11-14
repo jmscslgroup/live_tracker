@@ -176,7 +176,8 @@ def getCANResultStr():
 
 def is_wb(positions):
     """Check that positions increase monotonically."""
-    return all([x1 - x2 >= 0 for (x1, x2) in zip(positions[:-1], positions[1:])])
+    # return all([x1 - x2 >= 0 for (x1, x2) in zip(positions[:-1], positions[1:])])
+    return True
 
 
 class LiveTracker:
