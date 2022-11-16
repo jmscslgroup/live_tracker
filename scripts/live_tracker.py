@@ -450,10 +450,10 @@ def dist_to_line(point, polyline):
     ix0 = bisect.bisect(x, xc)
     if ix0 >= polyline.shape[0]:
         return side_street_thresh + 0.1
-    xa = x[ix0]
-    xb = x[ix0+1]
-    ya = y[ix0]
-    yb = y[ix0+1]
+    xa = x[ix0-1]
+    xb = x[ix0]
+    ya = y[ix0-1]
+    yb = y[ix0]
 
     return abs((xb-xa)*(yc-ya) - (yb-ya)*(xc-xa)) / np.sqrt((xb-xa) ** 2 + np.square(yb-ya) ** 2)
 
