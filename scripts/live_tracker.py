@@ -455,7 +455,7 @@ def dist_to_line(point, polyline):
     ya = y[ix0-1]
     yb = y[ix0]
 
-    return abs((xb-xa)*(yc-ya) - (yb-ya)*(xc-xa)) / np.sqrt((xb-xa) ** 2 + np.square(yb-ya) ** 2)
+    return abs((xb-xa)*(yc-ya) - (yb-ya)*(xc-xa)) / np.sqrt((xb-xa) ** 2 + (yb-ya) ** 2)
 
 class LiveTracker:
     def __init__(self):
