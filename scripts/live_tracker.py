@@ -124,6 +124,8 @@ def acc_speed_callback(data):
     global acc_speed
     global can_update_time
     acc_speed = data.data
+    if acc_speed >= 127:
+        acc_speed=127
     can_update_time = rospy.Time.now()
 
 def acc_status_callback(data):
